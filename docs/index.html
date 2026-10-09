@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Risk Archipelago</title>
+    <style>
+      :root {
+        --salt: #f3efdf;
+        --ink: #172238;
+        --blue: #2457d6;
+        --deep: #173c91;
+        --coral: #f36f56;
+        --kelp: #2f765f;
+        --sand: #d9c78d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--salt);
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+        min-height: 100vh;
+      }
+      .chart {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto minmax(560px, 1fr) auto;
+      }
+      .chart-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 28px;
+        border-bottom: 2px solid var(--ink);
+        background: var(--salt);
+      }
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .mark i {
+        width: 34px;
+        height: 34px;
+        border-radius: 53% 47% 60% 40%;
+        background: var(--blue);
+        box-shadow: 8px 3px 0 var(--coral);
+      }
+      .mark b {
+        font:
+          900 18px/1 Arial,
+          sans-serif;
+      }
+      .chart-head small {
+        font:
+          10px ui-monospace,
+          monospace;
+        letter-spacing: 0.16em;
+      }
+      .chart-head button {
+        border: 1px solid var(--ink);
+        background: transparent;
+        padding: 9px 13px;
+        font:
+          700 10px ui-monospace,
+          monospace;
+      }
+      .ocean-canvas {
+        position: relative;
+        overflow: hidden;
+        background-color: #cbdcf2;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.27) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.27) 1px, transparent 1px);
+        background-size: 42px 42px;
+      }
+      .ocean-canvas:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse at 15% 20%,
+            rgba(255, 255, 255, 0.55),
+            transparent 35%
+          ),
+          repeating-radial-gradient(
+            ellipse at 70% 70%,
+            transparent 0 17px,
+            rgba(36, 87, 214, 0.07) 18px 19px
+          );
+        animation: tide 12s ease-in-out infinite alternate;
+      }
+      @keyframes tide {
+        to {
+          transform: translate3d(14px, -8px, 0);
+        }
+      }
+      .map-title {
+        position: absolute;
+        left: 28px;
+        top: 24px;
+        z-index: 3;
+        max-width: 430px;
+      }
+      .map-title span {
+        font:
+          10px ui-monospace,
+          monospace;
+        letter-spacing: 0.18em;
+        color: var(--deep);
+      }
+      .map-title h1 {
+        margin: 8px 0 4px;
+        font-size: clamp(48px, 7vw, 98px);
+        line-height: 0.82;
+        letter-spacing: -0.07em;
+      }
+      .map-title p {
+        max-width: 380px;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .scale {
+        position: absolute;
+        right: 28px;
+        top: 26px;
+        border-top: 2px solid var(--ink);
+        width: 180px;
+        padding-top: 5px;
+        font:
+          9px ui-monospace,
+          monospace;
+        display: flex;
+        justify-content: space-between;
+      }
+      .islands {
+        position: absolute;
+        inset: 0;
+      }
+      .island-node {
+        position: absolute;
+        width: 190px;
+        min-height: 112px;
+        padding: 25px 21px 18px;
+        background: var(--sand);
+        clip-path: polygon(
+          12% 13%,
+          37% 2%,
+          67% 12%,
+          93% 7%,
+          100% 45%,
+          88% 81%,
+          57% 100%,
+          24% 91%,
+          0 67%,
+          5% 32%
+        );
+        filter: drop-shadow(9px 12px 0 rgba(23, 34, 56, 0.2));
+        display: grid;
+        place-content: center;
+        text-align: center;
+        animation: rise 0.8s ease both;
+      }
+      .island-node:before,
+      .depth-contour {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid rgba(23, 34, 56, 0.33);
+        clip-path: inherit;
+      }
+      .island-node b {
+        font:
+          900 15px Arial,
+          sans-serif;
+      }
+      .island-node small {
+        font:
+          9px ui-monospace,
+          monospace;
+      }
+      .island-node.one {
+        left: 50%;
+        top: 25%;
+        transform: rotate(-3deg);
+      }
+      .island-node.two {
+        left: 69%;
+        top: 57%;
+        background: #9cc7ae;
+        transform: rotate(5deg);
+      }
+      .island-node.three {
+        left: 30%;
+        top: 62%;
+        background: #efae93;
+      }
+      .depth-contour {
+        inset: -12px;
+        border: 2px dotted var(--deep);
+        opacity: 0.45;
+      }
+      .depth-contour.second {
+        inset: -23px;
+        opacity: 0.25;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          translate: 0 35px;
+          scale: 0.82;
+        }
+        to {
+          opacity: 1;
+          translate: 0 0;
+          scale: 1;
+        }
+      }
+      .legend {
+        position: absolute;
+        left: 28px;
+        bottom: 24px;
+        z-index: 4;
+        background: rgba(243, 239, 223, 0.92);
+        border: 1px solid var(--ink);
+        padding: 13px 15px;
+        font:
+          10px ui-monospace,
+          monospace;
+      }
+      .legend div {
+        margin: 4px 0;
+      }
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 7px;
+      }
+      .new {
+        background: var(--coral);
+      }
+      .deepens {
+        background: var(--kelp);
+      }
+      .duplicate {
+        background: var(--blue);
+      }
+      .map-status {
+        position: absolute;
+        right: 28px;
+        bottom: 25px;
+        background: var(--ink);
+        color: white;
+        padding: 11px 14px;
+        font:
+          10px ui-monospace,
+          monospace;
+        max-width: 360px;
+      }
+      .field-sheet {
+        position: relative;
+        background: var(--salt);
+        border-top: 2px solid var(--ink);
+        padding: 22px 28px 26px;
+        display: grid;
+        grid-template-columns: 220px 1fr auto;
+        gap: 22px;
+        align-items: end;
+      }
+      .sheet-intro h2 {
+        font-size: 28px;
+        line-height: 0.9;
+        margin: 0 0 10px;
+      }
+      .sheet-intro p {
+        margin: 0;
+        font-size: 12px;
+      }
+      .sheet-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .sheet-fields label {
+        font:
+          9px ui-monospace,
+          monospace;
+        letter-spacing: 0.1em;
+      }
+      .sheet-fields input {
+        width: 100%;
+        border: 0;
+        border-bottom: 2px solid var(--ink);
+        background: transparent;
+        padding: 8px 4px;
+        font:
+          14px Georgia,
+          serif;
+      }
+      .wide {
+        grid-column: 1/-1;
+      }
+      .sheet-actions {
+        display: grid;
+        gap: 7px;
+      }
+      .sheet-actions button {
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: white;
+        padding: 11px 14px;
+        font:
+          800 10px ui-monospace,
+          monospace;
+      }
+      .sheet-actions button:nth-child(2) {
+        background: var(--coral);
+        color: var(--ink);
+      }
+      .sheet-actions button:nth-child(3) {
+        background: transparent;
+        color: var(--ink);
+      }
+      .sheet-actions button:last-child {
+        background: var(--blue);
+      }
+      .result-note {
+        grid-column: 1/-1;
+        border-left: 5px solid var(--coral);
+        padding: 10px 14px;
+        background: #fffaf0;
+        font:
+          12px ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+      }
+      @media (max-width: 860px) {
+        .ocean-canvas {
+          min-height: 720px;
+        }
+        .field-sheet {
+          grid-template-columns: 1fr;
+        }
+        .sheet-fields {
+          grid-template-columns: 1fr;
+        }
+        .wide {
+          grid-column: auto;
+        }
+        .sheet-actions {
+          grid-template-columns: 1fr 1fr;
+        }
+        .island-node {
+          width: 150px;
+        }
+        .island-node.one {
+          left: 46%;
+          top: 34%;
+        }
+        .island-node.two {
+          left: 55%;
+          top: 64%;
+        }
+        .island-node.three {
+          left: 10%;
+          top: 57%;
+        }
+      }
+      @media (max-width: 520px) {
+        .chart-head {
+          padding: 14px;
+        }
+        .chart-head small {
+          display: none;
+        }
+        .map-title {
+          left: 18px;
+        }
+        .map-title h1 {
+          font-size: 58px;
+        }
+        .scale {
+          display: none;
+        }
+        .field-sheet {
+          padding: 18px;
+        }
+        .sheet-actions {
+          grid-template-columns: 1fr;
+        }
+        .legend {
+          left: 18px;
+        }
+        .map-status {
+          right: 18px;
+          max-width: 260px;
+        }
+        .island-node {
+          width: 132px;
+          min-height: 100px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="chart">
+      <header class="chart-head">
+        <div class="mark"><i></i><b>RISK ARCHIPELAGO</b></div>
+        <small>FIELD MAP / GENLAYER STUDIONET</small
+        ><button id="connect">CONNECT SURVEYOR</button>
+      </header>
+      <section class="ocean-canvas">
+        <div class="map-title">
+          <span>NONREDUNDANT RISK CARTOGRAPHY</span>
+          <h1>Sound the<br />unknown.</h1>
+          <p>
+            A field note can raise a new island, deepen an existing one, or
+            disappear as an echo. Validators decide the relation; the map
+            preserves the consequence.
+          </p>
+        </div>
+        <div class="scale">
+          <span>0 NM</span><span>SEMANTIC DEPTH</span><span>5 NM</span>
+        </div>
+        <div class="islands" id="islands">
+          <article class="island-node one">
+            <div class="depth-contour"></div>
+            <b>UNCHARTED</b><small>NO SOUNDINGS YET</small>
+          </article>
+        </div>
+        <aside class="legend">
+          <div><i class="dot new"></i>NEW / RAISES ISLAND</div>
+          <div><i class="dot deepens"></i>DEEPENS / ADDS CONTOUR</div>
+          <div><i class="dot duplicate"></i>DUPLICATE / ECHO ONLY</div>
+        </aside>
+        <div class="map-status" id="mapStatus">ATLAS / UNLOADED</div>
+      </section>
+      <footer class="field-sheet">
+        <div class="sheet-intro">
+          <h2>Field note<br />no. 01</h2>
+          <p>
+            Write one concrete mechanism or consequence. The whole existing map
+            will be compared.
+          </p>
+        </div>
+        <div class="sheet-fields">
+          <div>
+            <label>ATLAS ID</label><input id="atlasId" value="ATLAS-WEB" />
+          </div>
+          <div>
+            <label>OBSERVATION ID</label
+            ><input id="observationId" value="OBS-WEB" />
+          </div>
+          <div class="wide">
+            <label>NOTE TITLE</label
+            ><input
+              id="noteTitle"
+              value="Heat refuge missing at the east queue"
+            />
+          </div>
+          <div class="wide">
+            <label>FIELD NOTE</label
+            ><input
+              id="note"
+              value="The uncovered east queue has no shade or water point, creating sustained heat exposure for visitors waiting at midday."
+            />
+          </div>
+        </div>
+        <div class="sheet-actions">
+          <button id="chartAtlas">CHART ATLAS</button
+          ><button id="sound">SOUND FIELD NOTE</button
+          ><button id="publish">PUBLISH MAP</button
+          ><button id="load">LOAD MAP</button
+          ><button id="demo">RUN TWO-ISLAND DEMO</button>
+        </div>
+        <div class="result-note" id="result">No survey result recorded.</div>
+      </footer>
+    </main>
+    <script type="module">
+      import {
+        createAccount,
+        createClient,
+      } from "https://esm.sh/genlayer-js@1.1.8";
+      import { studionet } from "https://esm.sh/genlayer-js@1.1.8/chains";
+      const ADDRESS = "__CONTRACT_ADDRESS__",
+        ENDPOINT = "https://studio.genlayer.com/api",
+        $ = (s) => document.querySelector(s);
+      let client;
+      const show = (x) =>
+          ($("#result").textContent =
+            typeof x === "string"
+              ? x
+              : JSON.stringify(
+                  x,
+                  (_, v) => (typeof v === "bigint" ? v.toString() : v),
+                  2,
+                )),
+        status = (x) => ($("#mapStatus").textContent = x);
+      async function connect() {
+        if (!window.ethereum) throw Error("Install MetaMask or Rabby.");
+        const [a] = await ethereum.request({ method: "eth_requestAccounts" });
+        client = createClient({
+          chain: studionet,
+          endpoint: ENDPOINT,
+          account: a,
+          provider: ethereum,
+        });
+        status("SURVEYOR CONNECTED");
+        return client;
+      }
+      async function send(c, name, args) {
+        status("SUBMITTED / " + name);
+        const hash = await c.writeContract({
+          address: ADDRESS,
+          functionName: name,
+          args,
+          value: 0n,
+        });
+        status("ACCEPTED / WAITING FOR FINALIZED");
+        const receipt = await c.waitForTransactionReceipt({
+          hash,
+          status: "FINALIZED",
+          retries: 180,
+          interval: 5000,
+        });
+        if (
+          String(
+            receipt.result_name ?? receipt.resultName ?? "",
+          ).toUpperCase() !== "MAJORITY_AGREE"
+        )
+          throw Error("FINALIZED WITHOUT AGREEMENT");
+        status("FINALIZED / " + name);
+        return hash;
+      }
+      function draw(x) {
+        const positions = [
+          ["one", "50%", "25%"],
+          ["two", "69%", "57%"],
+          ["three", "30%", "62%"],
+          ["one", "18%", "34%"],
+          ["two", "48%", "68%"],
+          ["three", "77%", "29%"],
+        ];
+        $("#islands").innerHTML = x.islands.length ? "" : "";
+        x.islands.forEach((item, i) => {
+          const p = positions[i % positions.length],
+            node = document.createElement("article");
+          node.className = "island-node " + p[0];
+          node.style.left = p[1];
+          node.style.top = p[2];
+          node.innerHTML = `<div class="depth-contour"></div>${item.depth > 1 ? '<div class="depth-contour second"></div>' : ""}<b>${item.title}</b><small>${item.category} / S${item.severity} / DEPTH ${item.depth}</small>`;
+          $("#islands").appendChild(node);
+        });
+        status(
+          `${x.title.toUpperCase()} / ${x.state} / ${x.islands.length} ISLANDS`,
+        );
+      }
+      async function readAtlas(c = client, id = $("#atlasId").value.trim()) {
+        const reader =
+          c || createClient({ chain: studionet, endpoint: ENDPOINT });
+        const x = await reader.readContract({
+          address: ADDRESS,
+          functionName: "get_atlas",
+          args: [id],
+        });
+        draw(x);
+        return x;
+      }
+      $("#connect").onclick = () =>
+        connect().catch((e) => show({ error: e.message }));
+      $("#chartAtlas").onclick = async () => {
+        try {
+          const c = client || (await connect());
+          await send(c, "chart_atlas", [
+            $("#atlasId").value,
+            "Visitor experience risk map",
+            "Map concrete operational risks affecting visitors, staff, access, safety, and continuity at the shared public archive.",
+            ["SAFETY", "ACCESS", "CONTINUITY"],
+          ]);
+          show(await readAtlas(c));
+        } catch (e) {
+          show({ error: e.message });
+        }
+      };
+      $("#sound").onclick = async () => {
+        try {
+          const c = client || (await connect());
+          await send(c, "sound_observation", [
+            $("#atlasId").value,
+            $("#observationId").value,
+            $("#noteTitle").value,
+            $("#note").value,
+          ]);
+          const x = await readAtlas(c);
+          show(x);
+        } catch (e) {
+          show({ error: e.message });
+        }
+      };
+      $("#publish").onclick = async () => {
+        try {
+          const c = client || (await connect());
+          await send(c, "publish_map", [$("#atlasId").value]);
+          show(await readAtlas(c));
+        } catch (e) {
+          show({ error: e.message });
+        }
+      };
+      $("#load").onclick = () =>
+        readAtlas()
+          .then(show)
+          .catch((e) => show({ error: e.message }));
+      $("#demo").onclick = async () => {
+        const actor = createAccount(),
+          c = createClient({
+            chain: studionet,
+            endpoint: ENDPOINT,
+            account: actor,
+          }),
+          stamp = Date.now(),
+          aid = "ATLAS-" + stamp,
+          tx = {};
+        $("#atlasId").value = aid;
+        try {
+          tx.chart = await send(c, "chart_atlas", [
+            aid,
+            "Visitor experience risk map",
+            "Map concrete operational risks affecting visitors, staff, access, safety, and continuity at the shared public archive.",
+            ["SAFETY", "ACCESS", "CONTINUITY"],
+          ]);
+          tx.heat = await send(c, "sound_observation", [
+            aid,
+            "HEAT-" + stamp,
+            "Heat refuge missing at the east queue",
+            "The uncovered east queue has no shade or water point, creating sustained heat exposure for visitors waiting at midday.",
+          ]);
+          tx.language = await send(c, "sound_observation", [
+            aid,
+            "LANGUAGE-" + stamp,
+            "Emergency route unavailable in translated guide",
+            "The current translated visitor guide omits the emergency exit route, leaving non-English readers without evacuation directions.",
+          ]);
+          tx.publish = await send(c, "publish_map", [aid]);
+          const x = await readAtlas(c, aid);
+          if (x.state !== "PUBLISHED" || x.islands.length !== 2)
+            throw Error("EXPECTED PUBLISHED TWO-ISLAND MAP");
+          show({
+            atlasId: aid,
+            state: x.state,
+            islands: x.islands,
+            transactions: tx,
+          });
+        } catch (e) {
+          show({ error: e.message, transactions: tx });
+        }
+      };
+    </script>
+  </body>
+</html>
