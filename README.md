@@ -29,3 +29,10 @@ python scripts/verify_deployment.py
 ```
 
 The live evidence uses operator-written field notes and operator-controlled wallets. Wallet separation demonstrates replay behavior, not independent institutional authority. Deployment and map receipts are recorded in `deployment.json` and `evidence/` after verification.
+
+## Published chart
+
+- Map: https://risk-archipelago.pages.dev/
+- StudioNet contract: `0xc46B6ad26A0588FE2CcAdCce383820865467E2E5`
+- Source folio: https://github.com/warnedwarn/risk-archipelago
+- Verified survey: `ATLAS-1791581902`, two islands, one depth-two contour, normalized replay rejected, map `PUBLISHED`

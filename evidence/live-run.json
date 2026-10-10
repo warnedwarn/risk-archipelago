@@ -1,0 +1,67 @@
+{
+  "atlasId": "ATLAS-1791581902",
+  "contract": "0xc46B6ad26A0588FE2CcAdCce383820865467E2E5",
+  "transactions": {
+    "chart": "0x0d65507e038aad72982186df769e52a16e4ec8c2be016e788e7c3f86d7705f87",
+    "heat": "0x457979cf303d57fc19b0f046931dcb10e27ad23260094603786187465c3dc80e",
+    "language": "0x894f5dd27861b10aa09b3ac9eadf7ee8022fc164c4e589f88cbac4052f70c13b",
+    "depth": "0xab67433897c783ad1b4876834b76d7a5b478706817f3983ce4a7eac28cff8849",
+    "replay": "0x17ce93b59281fd25075e7545c630c6aae7978f81558367e0a0e8fff67f279df8",
+    "publish": "0x8d9af2ee6854c70d4432740ab441bfedc8afdcf926296278c74e15e7d52e041f"
+  },
+  "observations": [
+    {
+      "id": "HEAT-1791581902",
+      "relation": "NEW",
+      "island": "ISLE-HEAT-1791581902",
+      "category": "SAFETY",
+      "severity": 3
+    },
+    {
+      "id": "LANGUAGE-1791581902",
+      "relation": "NEW",
+      "island": "ISLE-LANGUAGE-1791581902",
+      "category": "SAFETY",
+      "severity": 4
+    },
+    {
+      "id": "PAVING-1791581902",
+      "relation": "DEEPENS",
+      "island": "ISLE-HEAT-1791581902",
+      "category": "SAFETY",
+      "severity": 3
+    }
+  ],
+  "map": {
+    "state": "PUBLISHED",
+    "islandCount": 2,
+    "islands": [
+      {
+        "anchor_observation_id": "HEAT-1791581902",
+        "category": "SAFETY",
+        "depth": 2,
+        "id": "ISLE-HEAT-1791581902",
+        "severity": 3,
+        "title": "Heat refuge missing at the east queue"
+      },
+      {
+        "anchor_observation_id": "LANGUAGE-1791581902",
+        "category": "SAFETY",
+        "depth": 1,
+        "id": "ISLE-LANGUAGE-1791581902",
+        "severity": 4,
+        "title": "Emergency route unavailable in translated guide"
+      }
+    ]
+  },
+  "normalizedReplay": {
+    "consensus": "MAJORITY_AGREE",
+    "execution": [
+      "ERROR",
+      "ERROR"
+    ],
+    "islandsUnchanged": true,
+    "observationsUnchanged": true
+  },
+  "fixtureDisclosure": "Field notes and wallets are operator-controlled fixtures used to prove semantic set mutation and cross-wallet normalized replay rejection."
+}
