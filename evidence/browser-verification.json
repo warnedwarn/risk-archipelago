@@ -1,0 +1,26 @@
+{
+  "verifiedAt": "2026-10-10",
+  "canonicalUrl": "https://risk-archipelago.pages.dev/",
+  "title": "Risk Archipelago",
+  "deployedContract": "0xc46B6ad26A0588FE2CcAdCce383820865467E2E5",
+  "contractAddressPresent": true,
+  "desktop": {
+    "viewport": "1280x720",
+    "horizontalOverflow": false,
+    "consoleErrorsOrWarnings": [],
+    "workflowControls": [
+      "CHART ATLAS",
+      "SOUND FIELD NOTE",
+      "PUBLISH MAP",
+      "LOAD MAP",
+      "RUN TWO-ISLAND DEMO"
+    ]
+  },
+  "mobile": {
+    "viewport": "390x844",
+    "horizontalOverflow": false,
+    "visibleControlCount": 6
+  },
+  "visualIdentity": "Editorial field map with a blue ocean canvas, irregular islands, depth contours, map legend, and paper field notes.",
+  "result": "PASS"
+}
